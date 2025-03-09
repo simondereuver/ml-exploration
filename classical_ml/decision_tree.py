@@ -28,6 +28,15 @@ class DecisionTree:
 
         if self._is_homogeneous(data): #basecase
             return self.Node(value=self._majority_class(data))
+        
+        if self._small_node_size(data):
+            return self.Node(value=self._majority_class(data))
+        
+        if self._max_depth(depth):
+            return self.Node(value=self._majority_class(data))
+        
+        if self._is_imbalanced(data):
+            return self.Node(value=self._majority_class(data))
 
         feature, threshold = self._feature_to_split(data, features)
         if feature is None or threshold is None:
@@ -68,7 +77,7 @@ class DecisionTree:
     def predict(self, data: np.ndarray):
         predictions = []
         for data_row in data:
-            predictions.append(self.__predict_with_tree(self.root, data_row))
+            predictions.append(self._predict_with_tree(self.root, data_row))
         return np.array(predictions)
 
     def _predict_with_tree(self, node, data_point):
@@ -77,14 +86,14 @@ class DecisionTree:
         #print(type(data_point[tree.feature]))
         if isinstance(data_point[node.feature], (int, float, np.number)):
             if data_point[node.feature] < node.threshold:
-                return  self.__predict_with_tree(node.l_child, data_point)
+                return  self._predict_with_tree(node.l_child, data_point)
             else:
-                return  self.__predict_with_tree(node.r_child, data_point)
+                return  self._predict_with_tree(node.r_child, data_point)
         else:
             if data_point[node.feature] == node.threshold:
-                return self.__predict_with_tree(node.l_child, data_point)
+                return self._predict_with_tree(node.l_child, data_point)
             else:
-                return self.__predict_with_tree(node.r_child, data_point)
+                return self._predict_with_tree(node.r_child, data_point)
 
     def _majority_class(self, data: np.ndarray):
         labels, counts = np.unique(data[:, -1], return_counts=True)
